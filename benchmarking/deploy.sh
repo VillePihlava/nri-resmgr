@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 
-NUMBER_OF_REPLICAS="10"
+export NUMBER_OF_REPLICAS="1"
 USE_PROMETHEUS="false"
 
 usage () {
