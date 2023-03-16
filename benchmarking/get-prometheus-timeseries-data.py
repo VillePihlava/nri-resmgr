@@ -67,7 +67,7 @@ def main():
     parser = argparse.ArgumentParser(description="Get prometheus timeseries data. Example queries: "
                                                  "\"rate(container_cpu_usage_seconds_total[1m]\", "
                                                  "\"container_memory_usage_bytes\", and "
-                                                 "\"container_working_set_in_bytes\".")
+                                                 "\"container_memory_working_set_bytes\".")
     parser.add_argument("url", help="url for accessing prometheus")
     parser.add_argument("-q", "--query", required=True, help="the prometheus query")
     parser.add_argument("-d", "--duration", type=int, default=60, help="the duration in seconds which ends in the time the program was run")
