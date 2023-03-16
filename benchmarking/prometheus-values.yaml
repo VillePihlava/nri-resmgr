@@ -12,3 +12,6 @@ server:
     evaluation_interval: 15s
   persistentVolume:
     enabled: false
+  service:
+    type: NodePort
+    nodePort: 30000

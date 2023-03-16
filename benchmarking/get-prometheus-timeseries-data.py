@@ -4,26 +4,28 @@ import sys
 import time
 import datetime
 
-def createCsvFromResult(metric, values):
-    result = "{},{}\n".format("field", "value")
+def createCsvFromResult(metric, values, start, end):
+    result = "start,{}\nend,{}\n".format(datetime.datetime.utcfromtimestamp(start), datetime.datetime.utcfromtimestamp(end))
+    result += "\n{},{}\n".format("field", "value")
     for key in metric:
         result += "{},{}\n".format(key, metric[key])
 
     result += "\n{},{}\n".format("time", "value")
     for value in values:
         result += "{},{}\n".format(str(value["time"]), value["value"])
-    result += "\n"
+
     return result
 
-def createTextOutputFromResult(metric, values):
-    result = "metric:\n{:40s} {}\n".format("field", "value")
+def createTextOutputFromResult(metric, values, start, end):
+    result = "start: {}\nend: {}\n".format(datetime.datetime.utcfromtimestamp(start), datetime.datetime.utcfromtimestamp(end))
+    result += "\nmetric:\n{:40s} {}\n".format("field", "value")
     for key in metric:
         result += "{:40s} {}\n".format(key, metric[key])
 
     result += "\nvalues:\n{:40s} {}\n".format("time", "value")
     for value in values:
         result += "{:40s} {}\n".format(str(value["time"]), value["value"])
-    result += "\n"
+
     return result
 
 
@@ -37,7 +39,7 @@ def processValues(values):
 def getQueryOutput(url, query, start, end):
     return requests.get(url + "/api/v1/query_range", { "query": query, "start": start, "end": end, "step": 15 }).json()
 
-def handleQueryOutput(output, csv):
+def handleQueryOutput(output, csv, start, end):
     if output["status"] != "success":
         return "request failed"
     
@@ -50,9 +52,9 @@ def handleQueryOutput(output, csv):
         values = processValues(result["values"])
 
         if csv is not None:
-            functionResult += createCsvFromResult(result["metric"], values)
+            functionResult += createCsvFromResult(result["metric"], values, start, end)
         else:
-            functionResult += createTextOutputFromResult(result["metric"], values)
+            functionResult += createTextOutputFromResult(result["metric"], values, start, end)
     
     if csv is not None:
         with open(csv, "w+") as csv_file:
@@ -69,12 +71,19 @@ def main():
     parser.add_argument("url", help="url for accessing prometheus")
     parser.add_argument("-q", "--query", required=True, help="the prometheus query")
     parser.add_argument("-d", "--duration", type=int, default=60, help="the duration in seconds which ends in the time the program was run")
+    parser.add_argument("-s", "--start", type=int, help="the start of the Prometheus query interval")
+    parser.add_argument("-e", "--end", type=int, help="the end of the Prometheus query interval")
     parser.add_argument("-c", "--csv", help="output csv file, otherwise print out json data")
     args = parser.parse_args(sys.argv[1:])
 
-    currentTime = time.time()
-    queryOutput = getQueryOutput(args.url, args.query, currentTime - args.duration, currentTime)
-    print(handleQueryOutput(queryOutput, args.csv))
+    queryOutput = {}
+    if args.start is not None and args.end is not None:
+        queryOutput = getQueryOutput(args.url, args.query, args.start, args.end)
+        print(handleQueryOutput(queryOutput, args.csv, args.start, args.end))
+    else:
+        currentTime = time.time()
+        queryOutput = getQueryOutput(args.url, args.query, currentTime - args.duration, currentTime)
+        print(handleQueryOutput(queryOutput, args.csv, currentTime - args.duration, currentTime))
 
 if __name__ == "__main__":
     main()

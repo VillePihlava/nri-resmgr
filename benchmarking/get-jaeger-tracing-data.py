@@ -1,7 +1,6 @@
 import requests
 import argparse
 import sys
-import time
 import datetime
 
 # OPERATION_NAMES = ["runtime.v1.RuntimeService/RunPodSandbox",
@@ -49,11 +48,11 @@ def processSpansAndTraces(url):
         output = getQueryOutput(url, key)
 
         if output["errors"] != None:
-            return "request failed"
+            print("query for operation {} failed".format(key))
 
         traceList = output["data"]
         if len(traceList) == 0:
-            return "no results from query"
+            print("no results for operation {}".format(key))
 
         for trace in traceList:
             spans = trace["spans"]
@@ -82,8 +81,6 @@ def main():
     parser.add_argument("url", help="url for accessing jaeger")
     parser.add_argument("-c", "--csv", help="output csv file, otherwise print out json data")
     args = parser.parse_args(sys.argv[1:])
-
-    currentTime = time.time()
 
     print(handleQueryOutput(args.url, args.csv))
 
