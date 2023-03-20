@@ -34,6 +34,7 @@ def processValues(values):
     for value in values:
         result.append({"time": datetime.datetime.utcfromtimestamp(value[0]), "value": value[1]})
 
+    result.sort(key=lambda datapoint: datapoint["time"])
     return result
 
 def getQueryOutput(url, query, start, end):

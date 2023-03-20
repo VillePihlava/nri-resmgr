@@ -59,6 +59,8 @@ def processSpansAndTraces(url):
             for span in spans:
                 operationName = span["operationName"]
                 result[operationName].append(span)
+        
+        result[key].sort(key=lambda datapoint: datapoint["startTime"])
 
     return result
 

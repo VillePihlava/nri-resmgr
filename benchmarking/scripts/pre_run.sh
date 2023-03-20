@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# For deploying Prometheus and starting all-in-one jaegertracing container.
+# Currently only for deploying Prometheus.
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 BASE_DIR="$(realpath "${SCRIPT_DIR}/..")"
@@ -28,5 +28,3 @@ done
 if [ "${USE_PROMETHEUS}" == "true" ]; then
     helm install prometheus prometheus-community/prometheus --version 19.7.2 -f prometheus-values.yaml --namespace monitoring --create-namespace
 fi
-
-${SCRIPT_DIR}/jaeger.sh

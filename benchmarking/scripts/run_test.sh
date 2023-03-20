@@ -8,13 +8,21 @@ BASE_DIR="$(realpath "${SCRIPT_DIR}/..")"
 NUMBER_OF_CONTAINERS_IN_INCREMENT="1"
 NUMBER_OF_INCREMENTS="1"
 FILENAME_LABEL=""
+SLEEP_AFTER_TEST="15s"
 
 usage () {
-    echo "usage: $0 -n <number of stress-ng containers in increment> -i <increments>"
+    cat << EOF
+usage: $0
+    -n <number of stress-ng containers in increment>
+    -i <increments>
+    -l <filename label>
+    -s <time to sleep waiting to query results>"
+
+EOF
     exit 1
 }
 
-while getopts ":n:i:l:" option; do
+while getopts ":n:i:l:s:" option; do
     case ${option} in
         n) 
             NUMBER_OF_CONTAINERS_IN_INCREMENT="${OPTARG}"
@@ -24,6 +32,9 @@ while getopts ":n:i:l:" option; do
             ;;
         l)
             FILENAME_LABEL="${OPTARG}"
+            ;;
+        s)
+            SLEEP_AFTER_TEST="${OPTARG}"
             ;;
         \?)
             usage
@@ -49,15 +60,20 @@ do
     export NUMBER_OF_REPLICAS=$((NUMBER_OF_CONTAINERS_IN_INCREMENT * i))
     echo "destruction iteration ${i}, adjusting containers to ${NUMBER_OF_REPLICAS}"
     envsubst < "${BASE_DIR}/manifests/stress-ng-deployment.yaml" | kubectl apply -f -
-    kubectl rollout status deployment stress-ng
+
+    # Wait for replicas to be terminated
+    while [[ $(kubectl get pods -A | awk '$4 == "Terminating" {print $4}') ]]
+    do
+        sleep 5
+    done
 done
 
 
-
+echo "test finished, sleeping for 15s + ${SLEEP_AFTER_TEST}"
 # Save results
 sleep 15s
 END_TIME=$(date +%s)
-sleep 15s
+sleep "${SLEEP_AFTER_TEST}"
 
 OUTPUT_FILE_DATE_PREFIX=$(date -u +"%Y%m%dT%H%M%SZ" -d "@${START_TIME}")
 OUTPUT_FILE_PREFIX="${OUTPUT_FILE_DATE_PREFIX}-${FILENAME_LABEL}"
