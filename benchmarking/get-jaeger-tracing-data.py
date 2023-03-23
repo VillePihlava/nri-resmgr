@@ -12,13 +12,12 @@ import datetime
 #                    "runtime.v1.RuntimeService/RemovePodSandbox"]
 
 def createCsvFromResult(processedDict):
-    result = ""
+    result = "{},{},{}\n".format("operationName", "startTime", "duration")
     for key in processedDict:
         operationSpans = processedDict[key]
-        result += "{}\n{},{}\n".format(key, "startTime", "duration")
         for span in operationSpans:
-            result += "{},{}\n".format(str(datetime.datetime.utcfromtimestamp(span["startTime"]/1000000)), str(span["duration"]))
-        result += "\n"
+            # Note, times in microseconds (divide by 1000000 to get seconds)!
+            result += "{},{},{}\n".format(key, str(span["startTime"] / 1000000), str(span["duration"] / 1000))
 
     return result
 
@@ -28,13 +27,14 @@ def createTextOutputFromResult(processedDict):
         operationSpans = processedDict[key]
         result += "{}, {} durations:\n{:40s} {}\n".format(key, len(operationSpans), "startTime", "duration")
         for span in operationSpans:
-            result += "{:40s} {}\n".format(str(datetime.datetime.utcfromtimestamp(span["startTime"]/1000000)), str(span["duration"]))
+            # Note, times in microseconds (divide by 1000000 to get seconds)!
+            result += "{:40s} {}\n".format(str(datetime.datetime.utcfromtimestamp(span["startTime"] / 1000000)), str(span["duration"] / 1000))
         result += "\n"
 
     return result
 
 
-def processSpansAndTraces(url):
+def processSpansAndTraces(url, start, end):
     result = {
         "runtime.v1.RuntimeService/RunPodSandbox": [],
         "runtime.v1.RuntimeService/CreateContainer": [],
@@ -45,7 +45,7 @@ def processSpansAndTraces(url):
         "runtime.v1.RuntimeService/RemovePodSandbox": []
     }
     for key in result:
-        output = getQueryOutput(url, key)
+        output = getQueryOutput(url, key, start, end)
 
         if output["errors"] != None:
             print("query for operation {} failed".format(key))
@@ -64,11 +64,11 @@ def processSpansAndTraces(url):
 
     return result
 
-def getQueryOutput(url, operationName):
-    return requests.get(url + "/api/traces", { "service": "containerd", "operation": operationName}).json()
+def getQueryOutput(url, operationName, start, end):
+    return requests.get(url + "/api/traces", { "service": "containerd", "operation": operationName, "start": start, "end": end}).json()
 
-def handleQueryOutput(url, csv):    
-    processedDict = processSpansAndTraces(url)
+def handleQueryOutput(url, csv, start, end):
+    processedDict = processSpansAndTraces(url, start, end)
 
     if csv is not None:
         with open(csv, "w+") as csv_file:
@@ -82,9 +82,12 @@ def main():
     parser = argparse.ArgumentParser(description="Get jaeger tracing data.")
     parser.add_argument("url", help="url for accessing jaeger")
     parser.add_argument("-c", "--csv", help="output csv file, otherwise print out json data")
+    parser.add_argument("-s", "--start", type=int, help="the start of the jaeger tracing query interval as UTC timestamp in seconds")
+    parser.add_argument("-e", "--end", type=int, help="the end of the Jaeger tracing query interval as UTC timestamp in seconds")
     args = parser.parse_args(sys.argv[1:])
 
-    print(handleQueryOutput(args.url, args.csv))
+    # Jaeger tracing uses microseconds.
+    print(handleQueryOutput(args.url, args.csv, int(args.start) * 1000000, int(args.end) * 1000000))
 
 if __name__ == "__main__":
     main()

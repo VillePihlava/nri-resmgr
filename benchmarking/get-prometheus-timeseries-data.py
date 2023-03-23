@@ -72,8 +72,8 @@ def main():
     parser.add_argument("url", help="url for accessing prometheus")
     parser.add_argument("-q", "--query", required=True, help="the prometheus query")
     parser.add_argument("-d", "--duration", type=int, default=60, help="the duration in seconds which ends in the time the program was run")
-    parser.add_argument("-s", "--start", type=int, help="the start of the Prometheus query interval")
-    parser.add_argument("-e", "--end", type=int, help="the end of the Prometheus query interval")
+    parser.add_argument("-s", "--start", type=int, help="the start of the Prometheus query interval as UTC timestamp in seconds")
+    parser.add_argument("-e", "--end", type=int, help="the end of the Prometheus query interval as UTC timestamp in seconds")
     parser.add_argument("-c", "--csv", help="output csv file, otherwise print out json data")
     args = parser.parse_args(sys.argv[1:])
 

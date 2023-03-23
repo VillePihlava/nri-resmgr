@@ -69,7 +69,7 @@ do
 done
 
 
-echo "test finished, sleeping for 15s + ${SLEEP_AFTER_TEST}"
+echo "containers destroyed, sleeping for 15s + ${SLEEP_AFTER_TEST}"
 # Save results
 sleep 15s
 END_TIME=$(date +%s)
@@ -85,4 +85,6 @@ if nc -z 127.0.0.1 30000; then
     python3 get-prometheus-timeseries-data.py http://127.0.0.1:30000 -q "container_memory_working_set_bytes{container=\"nri-resmgr-topology-aware\"}" -s "${START_TIME}" -e "${END_TIME}" -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-prometheus-container_memory_working_set_bytes.csv"
 fi
 
-python3 get-jaeger-tracing-data.py http://127.0.0.1:16686 -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-jaeger.csv"
+python3 get-jaeger-tracing-data.py http://127.0.0.1:16686 -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-jaeger.csv" -s "${START_TIME}" -e "${END_TIME}"
+
+echo "test complete, start time: ${START_TIME}, end time: ${END_TIME}"
