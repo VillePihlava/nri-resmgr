@@ -1,7 +1,6 @@
 import requests
 import argparse
 import sys
-import datetime
 
 # OPERATION_NAMES = ["runtime.v1.RuntimeService/RunPodSandbox",
 #                    "runtime.v1.RuntimeService/CreateContainer",
@@ -28,7 +27,7 @@ def createTextOutputFromResult(processedDict):
         result += "{}, {} durations:\n{:40s} {}\n".format(key, len(operationSpans), "startTime", "duration")
         for span in operationSpans:
             # Note, times in microseconds (divide by 1000000 to get seconds)!
-            result += "{:40s} {}\n".format(str(datetime.datetime.utcfromtimestamp(span["startTime"] / 1000000)), str(span["duration"] / 1000))
+            result += "{:40s} {}\n".format(str(span["startTime"] / 1000000), str(span["duration"] / 1000))
         result += "\n"
 
     return result
@@ -61,6 +60,9 @@ def processSpansAndTraces(url, start, end):
                 result[operationName].append(span)
         
         result[key].sort(key=lambda datapoint: datapoint["startTime"])
+
+        for datapoint in result[key]:
+            datapoint["startTime"] -= start
 
     return result
 
