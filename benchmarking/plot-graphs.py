@@ -4,22 +4,23 @@ import argparse
 import sys
 import os
 
-def add_to_subplots(df, groupby_param):
+def add_to_subplots(df):
     i = 1
-    df_grouped = df.groupby(groupby_param)
+    df_grouped = df.groupby("name")
     for title, group in df_grouped:
         ax = plt.subplot(4, 2, i)
-        group.plot(x="startTime", y="duration", ax=ax, legend=True, title=title)
-        ax.set_xlabel("time (seconds)")
-        ax.set_ylabel("duration (milliseconds)")
+        y_axis_label = group.columns[2]
+        group.plot(x="timestamp", y=y_axis_label, ax=ax, legend=True, title=title)
+        ax.set_xlabel("timestamp (seconds)")
+        ax.set_ylabel(y_axis_label)
         i += 1
 
-def createGraph(labels, inputFiles, output, column):
+def createGraph(labels, inputFiles, output):
     plt.figure(figsize=(12, 12))
     
     for file in inputFiles:
         df = pd.read_csv(file)
-        add_to_subplots(df, column)
+        add_to_subplots(df)
 
     figure_axes = plt.gcf().axes
     handles, old_labels = figure_axes[0].get_legend_handles_labels()
@@ -61,12 +62,11 @@ def main():
     parser.add_argument("directory", help="directory containing output to scan")
     parser.add_argument("-l", "--labels", required=True, help="comma-separated list of labels used in the test setups")
     parser.add_argument("-o", "--output", required=True, help="the output file")
-    parser.add_argument("-c", "--column", required=True, help="the column to group the data by")
     args = parser.parse_args(sys.argv[1:])
 
     labels = parseLabels(args.labels)
     inputFiles = scanCsvFiles(args.directory, labels)
-    print(createGraph(labels, inputFiles, args.output, args.column))
+    print(createGraph(labels, inputFiles, args.output))
 
 if __name__ == "__main__":
     main()

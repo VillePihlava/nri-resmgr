@@ -11,7 +11,7 @@ import sys
 #                    "runtime.v1.RuntimeService/RemovePodSandbox"]
 
 def createCsvFromResult(processedDict):
-    result = "{},{},{}\n".format("operationName", "startTime", "duration")
+    result = "{},{},{}\n".format("name", "timestamp", "duration (milliseconds)")
     for key in processedDict:
         operationSpans = processedDict[key]
         for span in operationSpans:
@@ -84,7 +84,7 @@ def main():
     parser = argparse.ArgumentParser(description="Get jaeger tracing data.")
     parser.add_argument("url", help="url for accessing jaeger")
     parser.add_argument("-c", "--csv", help="output csv file, otherwise print out json data")
-    parser.add_argument("-s", "--start", type=int, help="the start of the jaeger tracing query interval as UTC timestamp in seconds")
+    parser.add_argument("-s", "--start", type=int, help="the start of the Jaeger tracing query interval as UTC timestamp in seconds")
     parser.add_argument("-e", "--end", type=int, help="the end of the Jaeger tracing query interval as UTC timestamp in seconds")
     args = parser.parse_args(sys.argv[1:])
 

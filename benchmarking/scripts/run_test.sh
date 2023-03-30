@@ -82,9 +82,9 @@ mkdir -p "${BASE_DIR}/output"
 
 # Check if Prometheus is used
 if nc -z 127.0.0.1 30000; then
-    python3 get-prometheus-timeseries-data.py http://127.0.0.1:30000 -q "rate(container_cpu_usage_seconds_total{container=\"nri-resmgr-topology-aware\"}[1m])" -s "${START_TIME}" -e "${END_TIME}" -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-prometheus-rate-container_cpu_usage_seconds_total.csv"
-    python3 get-prometheus-timeseries-data.py http://127.0.0.1:30000 -q "container_memory_usage_bytes{container=\"nri-resmgr-topology-aware\"}" -s "${START_TIME}" -e "${END_TIME}" -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-prometheus-container_memory_usage_bytes.csv"
-    python3 get-prometheus-timeseries-data.py http://127.0.0.1:30000 -q "container_memory_working_set_bytes{container=\"nri-resmgr-topology-aware\"}" -s "${START_TIME}" -e "${END_TIME}" -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-prometheus-container_memory_working_set_bytes.csv"
+    python3 get-prometheus-timeseries-data.py http://127.0.0.1:30000 \
+        -q "rate(container_cpu_usage_seconds_total{container=~\"nri-resmgr.*\"}[1m]),container_memory_usage_bytes{container=~\"nri-resmgr.*\"},container_memory_working_set_bytes{container=~\"nri-resmgr.*\"}" \
+        -l "container_cpu_usage_seconds_total,container_memory_usage_bytes,container_memory_working_set_bytes" -s "${START_TIME}" -e "${END_TIME}" -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-prometheus.csv"
 fi
 
 python3 get-jaeger-tracing-data.py http://127.0.0.1:16686 -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-jaeger.csv" -s "${START_TIME}" -e "${END_TIME}"
