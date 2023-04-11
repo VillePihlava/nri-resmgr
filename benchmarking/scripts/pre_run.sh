@@ -5,7 +5,7 @@
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 BASE_DIR="$(realpath "${SCRIPT_DIR}/..")"
 
-USE_PROMETHEUS="false"
+USE_PROMETHEUS="true"
 
 usage () {
     echo "usage: $0 -p <use prometheus: \"true\" or \"false\">"
@@ -24,6 +24,8 @@ while getopts ":n:p:" option; do
             usage
     esac
 done
+
+kubectl apply -f "${BASE_DIR}/manifests/jaeger-deployment.yaml"
 
 if [ "${USE_PROMETHEUS}" == "true" ]; then
     helm install prometheus prometheus-community/prometheus --version 19.7.2 -f prometheus-values.yaml --namespace monitoring --create-namespace

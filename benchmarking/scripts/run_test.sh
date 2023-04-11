@@ -87,6 +87,6 @@ if nc -z 127.0.0.1 30000; then
         -l "container_cpu_usage_seconds_total,container_memory_usage_bytes,container_memory_working_set_bytes" -s "${START_TIME}" -e "${END_TIME}" -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-prometheus.csv"
 fi
 
-python3 get-jaeger-tracing-data.py http://127.0.0.1:16686 -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-jaeger.csv" -s "${START_TIME}" -e "${END_TIME}"
+python3 get-jaeger-tracing-data.py http://127.0.0.1:30002 -c "${BASE_DIR}/output/${OUTPUT_FILE_PREFIX}-jaeger.csv" -s "${START_TIME}" -e "${END_TIME}"
 
 echo "test complete, start time: ${START_TIME}, end time: ${END_TIME}"
