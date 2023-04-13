@@ -16,7 +16,7 @@ usage: $0
     -n <number of stress-ng containers in increment>
     -i <increments>
     -l <filename label>
-    -s <time to sleep waiting to query results>"
+    -s <time to sleep waiting to query results>
 
 EOF
     exit 1
